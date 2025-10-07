@@ -1,0 +1,1244 @@
+import streamlit as st
+ 
+st.title("My Chatbot")
+prompt = st.chat_input("Say something")
+if prompt:
+    with st.chat_message("user"):
+        st.write( prompt)
+
+
+================================================================
+import streamlit as st
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-ea70a396-8336-4312-b434-d580435b50ad",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-ea70a396-8336-4312-b434-d580435b50ad",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+chat=get_eli_chat_model()
+ 
+st.title("My Chatbot")
+prompt = st.chat_input("Say something")
+if prompt:
+    with st.chat_message("user"):
+        st.write(prompt)
+        response=chat.invoke(prompt).content
+    with st.chat_message("bot"):
+        st.write(response)
+ 
+=================================================================
+
+
+!pip install streamlit openai langchain langchain-openai httpx
+ 
+ 
+import streamlit as st
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+eli-b0bde4e3-cf64-4f1f-80e7-3bf0e4006478
+ 
+================================================================
+
+import streamlit as st
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-b0bde4e3-cf64-4f1f-80e7-3bf0e4006478",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-b0bde4e3-cf64-4f1f-80e7-3bf0e4006478",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+chat=get_eli_chat_model()
+ 
+st.title("My Chatbot")
+query = st.chat_input("Say something")
+if query:
+    with st.chat_message("user"):
+        st.write(query)
+        response=chat.invoke(query).content
+    with st.chat_message("assistant"):
+        st.write(response)
+		
+=================================================
+
+
+import streamlit as st
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+from PyPDF2 import PdfReader
+ 
+uploaded_file = st.sidebar.file_uploader("Choose a file", type=["pdf", "txt", "csv"])
+ 
+if uploaded_file is not None:
+    st.success(f"Uploaded: {uploaded_file.name}")
+ 
+    # Read the PDF
+    reader = PdfReader(uploaded_file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text() or ""
+ 
+    # Display the extracted text
+    st.text_area("PDF Content", text, height=400)
+   
+st.title("My Chatbot")
+query = st.chat_input("Enter your query")
+
+
+===============================================
+
+pip install langchain-chroma
+ 
+import bs4
+from langchain import hub
+from langchain_chroma import Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+ 
+pip install langchain-community
+ 
+=================================================
+
+def load_pdf_and_create_chroma_vector_store(file_path, persist_directory, chunk_size, chunk_overlap):
+    """
+    Load a PDF file and create a Chroma vector store.
+ 
+    Parameters
+    ----------
+    file_path: str
+        Path of the PDF file.
+    persist_directory: str
+        Path of the directory to store the Chroma vector store.
+    chunk_size: int
+        Size of the chunks to split the documents.
+    chunk_overlap: int
+        Overlap between the chunks to split the documents.
+ 
+    Returns
+    -------
+    None
+    """
+ 
+    # Create an embedding instance.
+    emmbeddings = HuggingFaceBgeEmbeddings(
+            model_name="BAAI/bge-base-en-v1.5",
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            encode_kwargs={"normalize_embeddings": True},
+    )
+ 
+    # Load the PDF file.
+    loader = PyPDFLoader(file_path)
+ 
+    # Extract pages lazily.
+    pages = loader.load()
+ 
+    # Split the pages into smaller documents.
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+ 
+ 
+   
+    splits = text_splitter.split_documents(pages)
+ 
+    # Create the Chroma vector store.
+    vectorstore = Chroma.from_documents(documents=splits, embedding=emmbeddings, persist_directory=persist_directory)
+ 
+ 
+"""
+This script is used to create a Chroma vector store from a PDF file.
+ 
+The PDF file is loaded using the PyPDFLoader. The loaded pages are then split into
+smaller documents using the RecursiveCharacterTextSplitter.
+ 
+Finally, the documents are added to the Chroma vector store.
+ 
+"""
+ 
+ 
+import bs4
+from langchain import hub
+from langchain_chroma import Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+ 
+ 
+def load_pdf_and_create_chroma_vector_store(file_path, persist_directory, chunk_size, chunk_overlap):
+    """
+    Load a PDF file and create a Chroma vector store.
+ 
+    Parameters
+    ----------
+    file_path: str
+        Path of the PDF file.
+    persist_directory: str
+        Path of the directory to store the Chroma vector store.
+    chunk_size: int
+        Size of the chunks to split the documents.
+    chunk_overlap: int
+        Overlap between the chunks to split the documents.
+ 
+    Returns
+    -------
+    None
+    """
+ 
+    # Create an embedding instance.
+    emmbeddings = HuggingFaceBgeEmbeddings(
+            model_name="BAAI/bge-base-en-v1.5",
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            encode_kwargs={"normalize_embeddings": True},
+    )
+ 
+    # Load the PDF file.
+    loader = PyPDFLoader(file_path)
+ 
+    # Extract pages lazily.
+    pages = loader.load()
+ 
+    # Split the pages into smaller documents.
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+ 
+ 
+   
+    splits = text_splitter.split_documents(pages)
+ 
+    # Create the Chroma vector store.
+    vectorstore = Chroma.from_documents(documents=splits, embedding=emmbeddings, persist_directory=persist_directory)
+ 
+ 
+load_pdf_and_create_chroma_vector_store("./agents.pdf", "./agentsdb", chunk_size=1000, chunk_overlap=200)
+ 
+ 
+ 
+ ============================================================
+ 
+ pip install sentence-transformers
+ 
+ ================================
+ 
+ Here is the complete script
+ 
+"""
+This script is used to create a Chroma vector store from a PDF file.
+ 
+The PDF file is loaded using the PyPDFLoader. The loaded pages are then split into
+smaller documents using the RecursiveCharacterTextSplitter.
+ 
+Finally, the documents are added to the Chroma vector store.
+ 
+"""
+ 
+ 
+import bs4
+from langchain import hub
+from langchain_chroma import Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+ 
+ 
+def load_pdf_and_create_chroma_vector_store(file_path, persist_directory, chunk_size, chunk_overlap):
+    """
+    Load a PDF file and create a Chroma vector store.
+ 
+    Parameters
+    ----------
+    file_path: str
+        Path of the PDF file.
+    persist_directory: str
+        Path of the directory to store the Chroma vector store.
+    chunk_size: int
+        Size of the chunks to split the documents.
+    chunk_overlap: int
+        Overlap between the chunks to split the documents.
+ 
+    Returns
+    -------
+    None
+    """
+ 
+    # Create an embedding instance.
+    emmbeddings = HuggingFaceBgeEmbeddings(
+            model_name="BAAI/bge-base-en-v1.5",
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            encode_kwargs={"normalize_embeddings": True},
+    )
+ 
+    # Load the PDF file.
+    loader = PyPDFLoader(file_path)
+ 
+    # Extract pages lazily.
+    pages = loader.load()
+ 
+    # Split the pages into smaller documents.
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+ 
+ 
+   
+    splits = text_splitter.split_documents(pages)
+ 
+    # Create the Chroma vector store.
+    vectorstore = Chroma.from_documents(documents=splits, embedding=emmbeddings, persist_directory=persist_directory)
+ 
+    return vectorstore
+ 
+db = load_pdf_and_create_chroma_vector_store("./agents.pdf", "./agentsdb", chunk_size=1000, chunk_overlap=200)
+ 
+ 
+query = "What are autonomous agents?"
+results = db.similarity_search(query, k=5)
+ 
+print(results)
+ 
+YOU WILL GET OUTPUT as below
+ 
+ 
+ 
+ 
+ 
+ 
+[Document(id='f8fae37a-6a96-46a9-b476-4542f774add5', metadata={'creator': 'PyPDF', 'page': 4, 'page_label': '5', 'producer': 'PyPDF', 'total_pages': 42, 'source': './agents.pdf', 'creationdate': ''}, page_content='Agents\n5\nFebruary 2025\nWhat is an agent?\nIn its most fundamental form, a Generative AI agent can be defined as an application that \nattempts to achieve a goal by observing the world and acting upon it using the tools that it \nhas at its disposal. Agents are autonomous and can act independently of human intervention, \nespecially when provided with proper goals or objectives they are meant to achieve. Agents \ncan also be proactive in their approach to reaching their goals. Even in the absence of \nexplicit instruction sets from a human, an agent can reason about what it should do next to \nachieve its ultimate goal. While the notion of agents in AI is quite general and powerful, this \nwhitepaper focuses on the specific types of agents that Generative AI models are capable of \nbuilding at the time of publication.\nIn order to understand the inner workings of an agent, let’s first introduce the foundational'), Document(id='8657733c-c312-4e3f-b15a-1b25976fe79d', metadata={'page': 4, 'creationdate': '', 'total_pages': 42, 'page_label': '5', 'producer': 'PyPDF', 'creator': 'PyPDF', 'source': './agents.pdf'}, page_content='Agents\n5\nFebruary 2025\nWhat is an agent?\nIn its most fundamental form, a Generative AI agent can be defined as an application that \nattempts to achieve a goal by observing the world and acting upon it using the tools that it \nhas at its disposal. Agents are autonomous and can act independently of human intervention, \nespecially when provided with proper goals or objectives they are meant to achieve. Agents \ncan also be proactive in their approach to reaching their goals. Even in the absence of \nexplicit instruction sets from a human, an agent can reason about what it should do next to \nachieve its ultimate goal. While the notion of agents in AI is quite general and powerful, this \nwhitepaper focuses on the specific types of agents that Generative AI models are capable of \nbuilding at the time of publication.\nIn order to understand the inner workings of an agent, let’s first introduce the foundational'), Document(id='9a1edd36-85c2-48c5-adfb-2ea52c61c68e', metadata={'page_label': '5', 'creator': 'PyPDF', 'producer': 'PyPDF', 'page': 4, 'total_pages': 42, 'source': './agents.pdf', 'creationdate': ''}, page_content='Agents\n5\nFebruary 2025\nWhat is an agent?\nIn its most fundamental form, a Generative AI agent can be defined as an application that \nattempts to achieve a goal by observing the world and acting upon it using the tools that it \nhas at its disposal. Agents are autonomous and can act independently of human intervention, \nespecially when provided with proper goals or objectives they are meant to achieve. Agents \ncan also be proactive in their approach to reaching their goals. Even in the absence of \nexplicit instruction sets from a human, an agent can reason about what it should do next to \nachieve its ultimate goal. While the notion of agents in AI is quite general and powerful, this \nwhitepaper focuses on the specific types of agents that Generative AI models are capable of \nbuilding at the time of publication.\nIn order to understand the inner workings of an agent, let’s first introduce the foundational'), Document(id='0a03e7d7-ae60-46c8-b8e3-bd2523e666fd', metadata={'creator': 'PyPDF', 'creationdate': '', 'page': 4, 'total_pages': 42, 'page_label': '5', 'producer': 'PyPDF', 'source': './agents.pdf'}, page_content='Agents\n5\nFebruary 2025\nWhat is an agent?\nIn its most fundamental form, a Generative AI agent can be defined as an application that \nattempts to achieve a goal by observing the world and acting upon it using the tools that it \nhas at its disposal. Agents are autonomous and can act independently of human intervention, \nespecially when provided with proper goals or objectives they are meant to achieve. Agents \ncan also be proactive in their approach to reaching their goals. Even in the absence of \nexplicit instruction sets from a human, an agent can reason about what it should do next to \nachieve its ultimate goal. While the notion of agents in AI is quite general and powerful, this \nwhitepaper focuses on the specific types of agents that Generative AI models are capable of \nbuilding at the time of publication.\nIn order to understand the inner workings of an agent, let’s first introduce the foundational'), Document(id='0c6791db-d510-48b9-80ab-864b85e89642', metadata={'source': './agents.pdf', 'producer': 'PyPDF', 'creationdate': '', 'creator': 'PyPDF', 'total_pages': 42, 'page': 39, 'page_label': '40'}, page_content='Agents\n40\nFebruary 2025\nSummary\nIn this whitepaper we’ve discussed the foundational building blocks of Generative AI \nagents, their compositions, and effective ways to implement them in the form of cognitive \narchitectures. Some key takeaways from this whitepaper include:\n1. Agents extend the capabilities of language models by leveraging tools to access real-\ntime information, suggest real-world actions, and plan and execute complex tasks \nautonomously. agents can leverage one or more language models to decide when and \nhow to transition through states and use external tools to complete any number of \ncomplex tasks that would be difficult or impossible for the model to complete on its own.\n2. At the heart of an agent’s operation is the orchestration layer, a cognitive architecture that \nstructures reasoning, planning, decision-making and guides its actions. Various reasoning \ntechniques such as ReAct, Chain-of-Thought, and Tree-of-Thoughts, provide a framework')]
+
+======================================================
+
+
+pip install faiss-cpu
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+import streamlit as st
+from PyPDF2 import PdfReader #library to read pdf files
+from langchain.text_splitter import RecursiveCharacterTextSplitter#library to split pdf files
+import os
+from langchain.vectorstores import FAISS #for vector embeddings
+from langchain.chains.question_answering import load_qa_chain #to chain the prompts
+from langchain.prompts import PromptTemplate #to create prompt templates
+from langchain import hub
+from langchain_chroma import Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+embeddings = HuggingFaceBgeEmbeddings(
+            model_name="BAAI/bge-base-en-v1.5",
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            encode_kwargs={"normalize_embeddings": True},)  
+ 
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+def get_pdf_text(pdf_docs):
+    text = ""
+    # iterate over all pdf files uploaded
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
+        # iterate over all pages in a pdf
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
+ 
+def get_text_chunks(text):
+    # create an object of RecursiveCharacterTextSplitter with specific chunk size and overlap size
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size = 10000, chunk_overlap = 1000)
+    # now split the text we have using object created
+    chunks = text_splitter.split_text(text)
+ 
+    return chunks
+ 
+def get_vector_store(text_chunks):
+    # Create an embedding instance.  
+    vector_store = FAISS.from_texts(text_chunks,embeddings) # use the embedding object on the splitted text of pdf docs
+    vector_store.save_local("faiss_index") # save the embeddings in local
+ 
+import streamlit as st
+from PyPDF2 import PdfReader #library to read pdf files
+from langchain.text_splitter import RecursiveCharacterTextSplitter#library to split pdf files
+import os
+from langchain.vectorstores import FAISS #for vector embeddings
+from langchain.chains.question_answering import load_qa_chain #to chain the prompts
+from langchain.prompts import PromptTemplate #to create prompt templates
+from langchain import hub
+from langchain_chroma import Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+embeddings = HuggingFaceBgeEmbeddings(
+            model_name="BAAI/bge-base-en-v1.5",
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            encode_kwargs={"normalize_embeddings": True},)  
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+def get_pdf_text(pdf_docs):
+    text = ""
+    # iterate over all pdf files uploaded
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
+        # iterate over all pages in a pdf
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
+ 
+def get_text_chunks(text):
+    # create an object of RecursiveCharacterTextSplitter with specific chunk size and overlap size
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size = 10000, chunk_overlap = 1000)
+    # now split the text we have using object created
+    chunks = text_splitter.split_text(text)
+ 
+    return chunks
+ 
+def get_vector_store(text_chunks):
+    # Create an embedding instance.  
+    vector_store = FAISS.from_texts(text_chunks,embeddings) # use the embedding object on the splitted text of pdf docs
+    vector_store.save_local("faiss_index") # save the embeddings in local
+ 
+def get_conversation_chain():
+ 
+    model = get_eli_chat_model()
+    # define the prompt
+    prompt_template = """
+    Answer the question as detailed as possible from the provided context, make sure to provide all the details, if the answer is not in
+    provided context just say, "answer is not available in the context", don't provide the wrong answer\n\n
+    Context:\n {context}?\n
+    Question: \n{question}\n
+ 
+    Answer:
+    """
+ 
+   
+    prompt = PromptTemplate(template = prompt_template, input_variables= ["context","question"])
+    print("Prompt: ", prompt)
+    chain = load_qa_chain(model,chain_type="stuff",prompt = prompt)
+ 
+    return chain
+ 
+def user_input(user_question):
+    # user_question is the input question
+    # load the local faiss db
+    new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+ 
+    # using similarity search, get the answer based on the input
+    docs = new_db.similarity_search(user_question)
+    print("Documents Returned: ", docs)
+    chain = get_conversation_chain()
+ 
+   
+    response = chain(
+        {"input_documents":docs, "question": user_question}
+        , return_only_outputs=True)
+ 
+   
+    return response["output_text"]
+   
+ 
+def main():
+    st.set_page_config("Chat PDF")
+    st.header("Chat with PDF using LLM")
+    with st.sidebar:
+        st.title("Menu:")
+        pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
+        if st.button("Submit & Process"):
+            with st.spinner("Processing..."):
+                raw_text = get_pdf_text(pdf_docs)
+                text_chunks = get_text_chunks(raw_text)
+                get_vector_store(text_chunks)
+                st.success("Done")
+ 
+    query = st.chat_input("Ask a Question")
+    if query:
+        with st.chat_message("user"):
+            st.write(query)
+        with st.spinner("Generating response..."):
+            response = user_input(query)
+            with st.chat_message("assistant"):
+                st.write(response)
+ 
+if __name__ == "__main__":
+    main()
+ 
+ =============================================================
+ 
+ #https://jennymyworld.github.io/2023/12/20/Develop-a-Multi-Document-Chatbot-with-LangChain-and-LLM/
+ 
+import streamlit as st
+from PyPDF2 import PdfReader #library to read pdf files
+from langchain.text_splitter import RecursiveCharacterTextSplitter#library to split pdf files
+import os
+from langchain.vectorstores import FAISS #for vector embeddings
+from langchain.chains.question_answering import load_qa_chain #to chain the prompts
+from langchain.prompts import PromptTemplate #to create prompt templates
+from langchain import hub
+from langchain_chroma import Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+embeddings = HuggingFaceBgeEmbeddings(
+            model_name="BAAI/bge-base-en-v1.5",
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            encode_kwargs={"normalize_embeddings": True},)  
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-9861a614-7c52-46e7-9fdf-ec3f70d3e488",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+def get_pdf_text(pdf_docs):
+    text = ""
+    # iterate over all pdf files uploaded
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
+        # iterate over all pages in a pdf
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
+ 
+def get_text_chunks(text):
+    # create an object of RecursiveCharacterTextSplitter with specific chunk size and overlap size
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size = 10000, chunk_overlap = 1000)
+    # now split the text we have using object created
+    chunks = text_splitter.split_text(text)
+ 
+    return chunks
+ 
+def get_vector_store(text_chunks):
+    # Create an embedding instance.  
+    vector_store = FAISS.from_texts(text_chunks,embeddings) # use the embedding object on the splitted text of pdf docs
+    vector_store.save_local("faiss_index") # save the embeddings in local
+ 
+def get_conversation_chain():
+ 
+    model = get_eli_chat_model()
+    # define the prompt
+    prompt_template = """
+    Answer the question as detailed as possible from the provided context, make sure to provide all the details, if the answer is not in
+    provided context just say, "answer is not available in the context", don't provide the wrong answer\n\n
+    Context:\n {context}?\n
+    Question: \n{question}\n
+ 
+    Answer:
+    """
+ 
+   
+    prompt = PromptTemplate(template = prompt_template, input_variables= ["context","question"])
+ 
+    chain = load_qa_chain(model,chain_type="stuff",prompt = prompt)
+ 
+    return chain
+ 
+ 
+def user_input(user_question):
+    # user_question is the input question
+    # load the local faiss db
+    new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+ 
+    # using similarity search, get the answer based on the input
+    docs = new_db.similarity_search(user_question)
+ 
+    chain = get_conversation_chain()
+ 
+   
+    response = chain(
+        {"input_documents":docs, "question": user_question}
+        , return_only_outputs=True)
+ 
+    print(response)
+    return response["output_text"]
+   
+ 
+def main():
+    st.set_page_config("Chat PDF")
+    st.header("Chat with PDF using LLM")
+ 
+    # Initialize chat history in session state
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+ 
+    with st.sidebar:
+        st.title("Menu:")
+        pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
+        if st.button("Submit & Process"):
+            with st.spinner("Processing..."):
+                raw_text = get_pdf_text(pdf_docs)
+                text_chunks = get_text_chunks(raw_text)
+                get_vector_store(text_chunks)
+                st.success("Done")
+ 
+    # Display previous chat messages
+    for chat in st.session_state.chat_history:
+        with st.chat_message(chat["role"]):
+            st.markdown(chat["content"])
+ 
+    # Handle new user input
+    query = st.chat_input("Ask a Question")
+    if query:
+        # Save user message
+        st.session_state.chat_history.append({"role": "user", "content": query})
+        with st.chat_message("user"):
+            st.write(query)
+ 
+        with st.spinner("Generating response..."):
+            response = user_input(query)
+ 
+        # Save assistant response
+        st.session_state.chat_history.append({"role": "assistant", "content": response})
+        with st.chat_message("assistant"):
+            st.write(response)
+ 
+ 
+if __name__ == "__main__":
+    main()
+	
+	
+=======================================================================
+
+
+import streamlit as st
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-b0bde4e3-cf64-4f1f-80e7-3bf0e4006478",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-b0bde4e3-cf64-4f1f-80e7-3bf0e4006478",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+chat=get_eli_chat_model()
+ 
+st.title("My Chatbot")
+query = st.chat_input("Say something")
+if query:
+    with st.chat_message("user"):
+        st.write(query)
+        response=chat.invoke(query).content
+    with st.chat_message("assistant"):
+        st.write(response)
+ 
+ =============================================================
+ 
+ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+ 
+prompt = ChatPromptTemplate.from_messages(
+    [
+        SystemMessage(
+            content="You are a helpful assistant. Answer all questions to the best of your ability."
+        ),
+        MessagesPlaceholder(variable_name="messages"),
+    ]
+)
+
+
+=========================================================
+
+Building your first Agent with LangChain and LangGraph: AI Email Agent | by Parth Sharma | Medium
+Building your first Agent   with Deepseek : AI Email Agent
+Building your first Agent with LangChain and LangGraph: AI Email Agent Introduction Large Language Models (LLMs) have been around for a while, primarily excelling at next-token prediction. However …
+ 
+def classify_resort(state: ResortState):
+    email_content = state["email"]
+    prompt = """You are expert in classifying the emails based on the conetent of the email.Classify below email as one of the following:
+    enquiry or feedback.Strictly return either "enquiry" or "feedback""" + "\n" +email_content
+    response = model.invoke(prompt)
+    return {"calssification": response}
+ 
+def reply_enquiry(state: ResortState):
+    email_content = state["email"]
+    prompt = """Reply to the below enquiry details""" + "\n" +email_content
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+def reply_feedback(state: ResortState):
+    email_content = state["email"]
+    prompt = """Reply to the below with feedback details""" + "\n" +email_content
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+ 
+   
+ 
+ 
+class ResortState:
+    email: str
+    calssification: str
+    reply: str
+ 
+ 
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import START,END, MessagesState, StateGraph
+ 
+class ResortState:
+    email: str
+    classification: str
+    reply: str
+ 
+def classify_resort(state: ResortState):
+    email_content = state["email"]
+    prompt = (
+        "You are an expert in classifying emails based on their content.\n"
+        "Classify the email below as either 'enquiry' or 'feedback'.\n"
+        "Strictly return either 'enquiry' or 'feedback'.\n\n"
+        f"{email_content}"
+    )
+    response = model.invoke(prompt)
+    return {"classification": response}
+ 
+def reply_enquiry(state: ResortState):
+    email_content = state["email"]
+    prompt = f"Reply to the following enquiry:\n\n{email_content}"
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+def reply_feedback(state: ResortState):
+    email_content = state["email"]
+    prompt = f"Reply to the following feedback:\n\n{email_content}"
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+def route(state: ResortState):
+    return "reply_enquiry" if state["classification"] == "enquiry" else "reply_feedback"
+ 
+# Define the workflow
+workflow = StateGraph(ResortState)
+workflow.add_node("classify_resort", classify_resort)
+workflow.add_node("reply_enquiry", reply_enquiry)
+workflow.add_node("reply_feedback", reply_feedback)
+workflow.add_node("route", route)
+ 
+workflow.add_edge(START, "classify_resort")
+workflow.add_edge("classify_resort", "route")
+workflow.add_conditional_edges("route", route, ["reply_enquiry", "reply_feedback"])
+workflow.add_edge("reply_enquiry", END)
+workflow.add_edge("reply_feedback", END)
+ 
+ 
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-b66f4383-3005-43e0-b721-16ea9788d64e",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-b66f4383-3005-43e0-b721-16ea9788d64e",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+ 
+# Add simple in-memory checkpointer
+memory = MemorySaver()
+app = workflow.compile(checkpointer=memory)
+ 
+from IPython.display import Image
+ 
+Image(app.get_graph().draw_mermaid_png())
+ 
+ 
+ ==================================================================
+ 
+ 
+ from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+from IPython.display import Image
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import START,END, StateGraph
+from dataclasses import dataclass
+import streamlit as st
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-b66f4383-3005-43e0-b721-16ea9788d64e",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-b66f4383-3005-43e0-b721-16ea9788d64e",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+model = get_eli_chat_model()
+ 
+@dataclass
+class ResortState:
+    email: str
+    classification: str =""
+    reply: str=""
+ 
+def classify_email(state: ResortState):
+    email_content = state.email
+    prompt = (
+        "You are an expert in classifying emails based on their content.\n"
+        "Classify the email below as either 'enquiry' or 'feedback'.\n"
+        "Strictly return either 'enquiry' or 'feedback'.\n\n"
+        f"{email_content}"
+    )
+    response = model.invoke(prompt)
+    return {"classification": response}
+ 
+def reply_enquiry(state: ResortState):
+    email_content = state.email
+    prompt = f"Reply to the following enquiry:\n\n{email_content}"
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+def reply_feedback(state: ResortState):
+    email_content = state.email
+    prompt = f"Reply to the following feedback:\n\n{email_content}"
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+def route(state: ResortState):
+    return "reply_enquiry" if state.classification == "enquiry" else "feedback"
+ 
+# Define the workflow
+workflow = StateGraph(ResortState)
+workflow.add_node("classify_email", classify_email)
+workflow.add_node("reply_enquiry", reply_enquiry)
+workflow.add_node("reply_feedback", reply_feedback)
+ 
+ 
+workflow.add_edge(START, "classify_email")
+workflow.add_conditional_edges("classify_email", route,
+                               {"enquiry": "reply_enquiry",
+                                "feedback": "reply_feedback",
+                                })
+workflow.add_edge("reply_enquiry", END)
+workflow.add_edge("reply_feedback", END)
+ 
+# Add simple in-memory checkpointer
+memory = MemorySaver()
+app = workflow.compile(checkpointer=memory)
+Image(app.get_graph().draw_mermaid_png())
+ 
+config = {
+        "configurable": {
+        # Checkpoints are accessed by thread_id
+        "thread_id": "1",
+         }
+    }
+ 
+email = st.chat_input("Enter your email:")
+if email:
+    with st.chat_message("user"):
+        st.write(email)
+    with st.spinner("Processing..."):
+        inputs = {"email": email}
+        print("Processing....")
+        final_state = app.invoke(inputs, config)
+        print(final_state['email'])
+        print("Classiifcation:",final_state['classification'].content)
+        print("Reply Mail:==>", final_state['reply'].content)
+    with st.chat_message("assistant"):
+        st.write(final_state['reply'].content)
+ 
+ 
+ 
+ 
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+from IPython.display import Image
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import START,END, StateGraph
+from dataclasses import dataclass
+import streamlit as st
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-b66f4383-3005-43e0-b721-16ea9788d64e",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=temperature,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-b66f4383-3005-43e0-b721-16ea9788d64e",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+model = get_eli_chat_model()
+ 
+@dataclass
+class ResortState:
+    email: str
+    classification: str =""
+    reply: str=""
+ 
+def classify_email(state: ResortState):
+    email_content = state.email
+    prompt = (
+        "You are an expert in classifying emails based on their content.\n"
+        "Classify the email below as either 'enquiry' or 'feedback'.\n"
+        "Strictly return either 'enquiry' or 'feedback'.\n\n"
+        f"{email_content}"
+    )
+    response = model.invoke(prompt)
+    return {"classification": response}
+ 
+def reply_enquiry(state: ResortState):
+    email_content = state.email
+    prompt = f"Reply to the following enquiry:\n\n{email_content}"
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+def reply_feedback(state: ResortState):
+    email_content = state.email
+    prompt = f"Reply to the following feedback:\n\n{email_content}"
+    reply = model.invoke(prompt)
+    return {"reply": reply}
+ 
+def route(state: ResortState):
+    return "reply_enquiry" if state.classification == "enquiry" else "feedback"
+ 
+# Define the workflow
+workflow = StateGraph(ResortState)
+workflow.add_node("classify_email", classify_email)
+workflow.add_node("reply_enquiry", reply_enquiry)
+workflow.add_node("reply_feedback", reply_feedback)
+ 
+ 
+workflow.add_edge(START, "classify_email")
+workflow.add_conditional_edges("classify_email", route,
+                               {"enquiry": "reply_enquiry",
+                                "feedback": "reply_feedback",
+                                })
+workflow.add_edge("reply_enquiry", END)
+workflow.add_edge("reply_feedback", END)
+ 
+# Add simple in-memory checkpointer
+memory = MemorySaver()
+app = workflow.compile(checkpointer=memory)
+Image(app.get_graph().draw_mermaid_png())
+ 
+config = {
+        "configurable": {
+        # Checkpoints are accessed by thread_id
+        "thread_id": "1",
+         }
+    }
+ 
+email = st.chat_input("Enter your email:")
+if email:
+    with st.chat_message("user"):
+        st.write(email)
+    with st.spinner("Processing..."):
+        inputs = {"email": email}
+        print("Processing....")
+        final_state = app.invoke(inputs, config)
+        print(final_state['email'])
+        print("Classiifcation:",final_state['classification'].content)
+        print("Reply Mail:==>", final_state['reply'].content)
+    with st.chat_message("assistant"):
+        st.write(final_state['reply'].content)
+ 
+ 
+ 
+ ==================================================================
+ 
+ from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+ 
+ 
+def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    # Create an instance of the OpenAI client
+    client = OpenAI(
+        api_key="eli-d3884a58-35ad-43ff-8212-55bbbe0d6065",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        http_client=httpx.Client(verify=False),
+    )
+    # Create an instance of ChatOpenAI
+    llm = ChatOpenAI(
+        model=model_name,
+        temperature=0,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+        api_key="eli-d3884a58-35ad-43ff-8212-55bbbe0d6065",
+        base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+    )
+    # Now we plug the OpenAI client into our langchain-openai interface
+    llm.client = client.chat.completions
+    return llm
+ 
+from bs4 import BeautifulSoup as Soup
+from langchain_community.document_loaders.recursive_url_loader import RecursiveUrlLoader
+ 
+# LCEL docs
+url = "https://python.langchain.com/docs/concepts/lcel/"
+loader = RecursiveUrlLoader(
+    url=url, max_depth=20, extractor=lambda x: Soup(x, "html.parser").text
+)
+docs = loader.load()
+ 
+# Sort the list based on the URLs and get the text
+d_sorted = sorted(docs, key=lambda x: x.metadata["source"])
+d_reversed = list(reversed(d_sorted))
+concatenated_content = "\n\n\n --- \n\n\n".join(
+    [doc.page_content for doc in d_reversed]
+)
+ 
+print(concatenated_content)
+ 
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
+ 
+### OpenAI
+ 
+# Grader prompt
+code_gen_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are a coding assistant with expertise in LCEL, LangChain expression language. \n
+    Here is a full set of LCEL documentation:  \n ------- \n  {context} \n ------- \n Answer the user
+    question based on the above provided documentation. Ensure any code you provide can be executed \n
+    with all required imports and variables defined. Structure your answer with a description of the code solution. \n
+    Then list the imports. And finally list the functioning code block. Here is the user question:""",
+        ),
+        ("placeholder", "{messages}"),
+    ]
+)
+ 
+ 
+# Data model
+class code(BaseModel):
+    """Schema for code solutions to questions about LCEL."""
+ 
+    prefix: str = Field(description="Description of the problem and approach")
+    imports: str = Field(description="Code block import statements")
+    code: str = Field(description="Code block not including import statements")
+ 
+ 
+llm = get_eli_chat_model()
+code_gen_chain_oai = code_gen_prompt | llm.with_structured_output(code)
+question = "How do I build a RAG chain in LCEL?"
+solution = code_gen_chain_oai.invoke(
+    {"context": concatenated_content, "messages": [("user", question)]}
+)
+ 
+ 
+==================================================
+
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
+from typing import Optional
+from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import StructuredOutputParser
+from langchain_core.messages import HumanMessage
+from pydantic import BaseModel, Field
+from typing import Optional
+from langchain.output_parsers import PydanticOutputParser
+from langchain.chains.llm import LLMChain
+ 
+### OpenAI
+ 
+# Grader prompt
+code_gen_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are a coding assistant with expertise in LCEL, LangChain expression language. \n
+    Here is a full set of LCEL documentation:  \n ------- \n  {context} \n ------- \n Answer the user
+    question based on the above provided documentation. Ensure any code you provide can be executed \n
+    with all required imports and variables defined. Structure your answer with a description of the code solution. \n
+    Then list the imports. And finally list the functioning code block. Here is the user question:""",
+        ),
+        ("placeholder", "{messages}"),
+    ]
+)
+ 
+ 
+# Data model
+class code(BaseModel):
+    """Schema for code solutions to questions about LCEL."""
+ 
+    prefix: str = Field(description="Description of the problem and approach")
+    imports: str = Field(description="Code block import statements")
+    code: str = Field(description="Code block not including import statements")
+ 
+ 
+llm = get_eli_chat_model()
+parser = PydanticOutputParser(pydantic_object=code)
+chain = LLMChain(llm=llm, prompt=code_gen_prompt, output_parser=parser)
+ 
+# Prepare input dictionary
+input_data = {
+    "context": concatenated_content,
+    "messages": "How do I build RAG chain in LCEL"
+}
+ 
+# Invoke the chain
+result = chain.invoke(input_data)
+# Input
+ 
+==================================================================
+
