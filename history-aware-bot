@@ -1,0 +1,118 @@
+import streamlit as st
+from langchain_openai import ChatOpenAI
+import httpx
+from openai import OpenAI
+import bs4
+from langchain import hub
+from langchain.chains import create_retrieval_chain, create_history_aware_retriever
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_chroma import Chroma
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.llms.fake import FakeListLLM
+from langchain import hub
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.vectorstores import InMemoryVectorStore
+from pypdf import PdfReader
+from langchain.schema import Document
+st.title("Chat Bot")
+ 
+@st.cache_resource
+def get_embeddings():
+    emmbeddings = HuggingFaceBgeEmbeddings(
+            model_name="BAAI/bge-base-en-v1.5",
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            encode_kwargs={"normalize_embeddings": True},
+    )
+    return emmbeddings
+ 
+file_input = st.sidebar.file_uploader("Upload your pdf", accept_multiple_files=False, type="pdf")
+if file_input:
+    @st.cache_resource
+    def get_retriever():
+        reader = PdfReader(file_input)
+        docs = []
+        for i, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text:
+                docs.append(Document(page_content=text, metadata={"page": i}))
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        chunks = splitter.split_documents(docs)
+        vector_store = InMemoryVectorStore.from_documents(chunks, embedding=get_embeddings())
+        retriever=vector_store.as_retriever()
+        return retriever
+    retriever = get_retriever()
+    def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+        # Create an instance of the OpenAI client
+        client = OpenAI(
+            api_key="eli-431d65b4-3245-4f05-b553-538367d9c000",
+            base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+            http_client=httpx.Client(verify=False),
+        )
+        # Create an instance of ChatOpenAI
+        llm = ChatOpenAI(
+            model=model_name,
+            temperature=0,
+            max_tokens=None,
+            timeout=None,
+            max_retries=2,
+            api_key="eli-431d65b4-3245-4f05-b553-538367d9c000",
+            base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        )
+        # Now we plug the OpenAI client into our langchain-openai interface
+        llm.client = client.chat.completions
+        return llm
+   
+   
+    chat = get_eli_chat_model()
+ 
+    from random import randint 
+    # responses = ["how are you","okay..................","hellokajdckadf","kkkkkkkkkkkkkkkk","saidhsdkj"]
+ 
+ 
+    # chat = FakeListLLM(responses=[f"{responses[randint(0,len(responses)-1)]}"])
+   
+ 
+   
+    rephrase_prompt = hub.pull("langchain-ai/chat-langchain-rephrase")
+    history_aware_retriever=create_history_aware_retriever(chat, retriever, rephrase_prompt)
+    system_prompt = (
+        "You are an assistant for question-answering tasks. "
+        "Use the following pieces of retrieved context to answer "
+        "the question. If User is greeting then greet the user."
+        "If you don't know the answer, say that you "
+        "don't know. Use three sentences maximum and keep the "
+        "answer concise."
+        "\n\n"
+        "{context}"
+    )
+ 
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_prompt),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ]
+    )
+    docs_chain=create_stuff_documents_chain(chat, prompt)
+    history_aware_retriever_chain=create_retrieval_chain(history_aware_retriever,docs_chain)
+ 
+   
+    if "messages" not in st.session_state:
+            st.session_state.messages = []
+ 
+    query = st.chat_input("Say something")
+    if query:
+        response = history_aware_retriever_chain.invoke({"input": query,
+                                                        "chat_history":st.session_state.messages})
+        # print(response)
+        st.session_state.messages.append({"role":"user","content":query})
+        st.session_state.messages.append({"role":"ai","content":response["answer"]})
+        # st.write(response['answer'])
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
