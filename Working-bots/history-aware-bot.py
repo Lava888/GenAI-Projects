@@ -1,0 +1,108 @@
+import streamlit as st
+import httpx
+import os
+from pypdf import PdfReader
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain.schema import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain.chains import create_retrieval_chain, create_history_aware_retriever
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+st.title("Chat Bot")
+client = httpx.Client(verify=False)
+ 
+@st.cache_resource
+def get_embeddings():
+    emmbeddings = OpenAIEmbeddings(
+    base_url="https://genailab.tcs.in",
+    model="azure/genailab-maas-text-embedding-3-large",
+    api_key="sk-kFX3rQYe-dHtSEbfudJyHg",
+    http_client=client
+)
+    return emmbeddings
+
+tiktoken_cache_dir = "./token"
+os.environ["TIKTOKEN_CACHE_DIR"] = tiktoken_cache_dir
+client = httpx.Client(verify=False)
+
+file_input = st.sidebar.file_uploader("Upload your pdf", accept_multiple_files=False, type="pdf")
+if file_input:
+    @st.cache_resource
+    def get_retriever():
+        reader = PdfReader(file_input)
+        docs = []
+        for i, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text:
+                docs.append(Document(page_content=text, metadata={"page": i}))
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        chunks = splitter.split_documents(docs)
+        # vector_store = InMemoryVectorStore.from_documents(chunks, embedding=get_embeddings())
+        vector_store = FAISS.from_documents(chunks, embedding=get_embeddings())
+        retriever=vector_store.as_retriever()
+        return retriever
+    retriever = get_retriever()
+    def get_eli_chat_model():
+        # Create an instance of the OpenAI client
+        llm = ChatOpenAI(
+        base_url="https://genailab.tcs.in",
+        model="azure_ai/genailab-maas-DeepSeek-V3-0324",
+        api_key="sk-kFX3rQYe-dHtSEbfudJyHg",
+        http_client=client
+        )
+        return llm
+   
+   
+    chat = get_eli_chat_model()
+ 
+    from random import randint 
+    # responses = ["how are you","okay..................","hellokajdckadf","kkkkkkkkkkkkkkkk","saidhsdkj"]
+ 
+ 
+    # chat = FakeListLLM(responses=[f"{responses[randint(0,len(responses)-1)]}"])
+   
+ 
+   
+    rephrase_prompt = ChatPromptTemplate.from_messages([
+    ("system", "Rephrase the user's question to be more specific and context-aware."),
+    ("human", "{input}")
+    ])
+    history_aware_retriever=create_history_aware_retriever(chat, retriever, rephrase_prompt)
+    system_prompt = (
+        "You are an assistant for question-answering tasks. "
+        "Use the following pieces of retrieved context to answer "
+        "the question. If User is greeting then greet the user."
+        "If you don't know the answer, say that you "
+        "don't know. Use three sentences maximum and keep the "
+        "answer concise."
+        "\n\n"
+        "{context}"
+    )
+ 
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_prompt),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ]
+    )
+    docs_chain=create_stuff_documents_chain(chat, prompt)
+    history_aware_retriever_chain=create_retrieval_chain(history_aware_retriever,docs_chain)
+ 
+   
+    if "messages" not in st.session_state:
+            st.session_state.messages = []
+ 
+    query = st.chat_input("Say something")
+    if query:
+        response = history_aware_retriever_chain.invoke({"input": query,
+                                                        "chat_history":st.session_state.messages})
+        # print(response)
+        st.session_state.messages.append({"role":"user","content":query})
+        st.session_state.messages.append({"role":"ai","content":response["answer"]})
+        # st.write(response['answer'])
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
