@@ -3,9 +3,11 @@ from langchain_openai import ChatOpenAI
 import httpx
 from openai import OpenAI
 import bs4
+import os
 from langchain import hub
 from langchain.chains import create_retrieval_chain, create_history_aware_retriever
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_community.vectorstores import FAISS
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -18,18 +20,26 @@ from langchain.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores import InMemoryVectorStore
 from pypdf import PdfReader
+from langchain_openai import OpenAIEmbeddings
 from langchain.schema import Document
+
 st.title("Chat Bot")
+client = httpx.Client(verify=False)
  
 @st.cache_resource
 def get_embeddings():
-    emmbeddings = HuggingFaceBgeEmbeddings(
-            model_name="BAAI/bge-base-en-v1.5",
-            model_kwargs={"device": "cpu", "trust_remote_code": True},
-            encode_kwargs={"normalize_embeddings": True},
-    )
+    emmbeddings = OpenAIEmbeddings(
+    base_url="https://genailab.tcs.in",
+    model="azure/genailab-maas-text-embedding-3-large",
+    api_key="sk-kFX3rQYe-dHtSEbfudJyHg",
+    http_client=client
+)
     return emmbeddings
- 
+
+tiktoken_cache_dir = "./token"
+os.environ["TIKTOKEN_CACHE_DIR"] = tiktoken_cache_dir
+client = httpx.Client(verify=False)
+
 file_input = st.sidebar.file_uploader("Upload your pdf", accept_multiple_files=False, type="pdf")
 if file_input:
     @st.cache_resource
@@ -42,29 +52,19 @@ if file_input:
                 docs.append(Document(page_content=text, metadata={"page": i}))
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         chunks = splitter.split_documents(docs)
-        vector_store = InMemoryVectorStore.from_documents(chunks, embedding=get_embeddings())
+        # vector_store = InMemoryVectorStore.from_documents(chunks, embedding=get_embeddings())
+        vector_store = FAISS.from_documents(chunks, embedding=get_embeddings())
         retriever=vector_store.as_retriever()
         return retriever
     retriever = get_retriever()
-    def get_eli_chat_model(temperature: float = 0.0, model_name: str = "qwen2.5-7b"):
+    def get_eli_chat_model():
         # Create an instance of the OpenAI client
-        client = OpenAI(
-            api_key="eli-431d65b4-3245-4f05-b553-538367d9c000",
-            base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
-            http_client=httpx.Client(verify=False),
-        )
-        # Create an instance of ChatOpenAI
         llm = ChatOpenAI(
-            model=model_name,
-            temperature=0,
-            max_tokens=None,
-            timeout=None,
-            max_retries=2,
-            api_key="eli-431d65b4-3245-4f05-b553-538367d9c000",
-            base_url="https://gateway.eli.gaia.gic.ericsson.se/api/openai/v1",
+        base_url="https://genailab.tcs.in",
+        model="azure_ai/genailab-maas-DeepSeek-V3-0324",
+        api_key="sk-kFX3rQYe-dHtSEbfudJyHg",
+        http_client=client
         )
-        # Now we plug the OpenAI client into our langchain-openai interface
-        llm.client = client.chat.completions
         return llm
    
    
@@ -78,7 +78,10 @@ if file_input:
    
  
    
-    rephrase_prompt = hub.pull("langchain-ai/chat-langchain-rephrase")
+    rephrase_prompt = ChatPromptTemplate.from_messages([
+    ("system", "Rephrase the user's question to be more specific and context-aware."),
+    ("human", "{input}")
+    ])
     history_aware_retriever=create_history_aware_retriever(chat, retriever, rephrase_prompt)
     system_prompt = (
         "You are an assistant for question-answering tasks. "
