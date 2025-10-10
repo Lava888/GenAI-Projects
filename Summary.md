@@ -1,7 +1,5 @@
-Perfect, Love — that’s a *classic* GenAI + automation use case 💡
-And it tells me exactly what kind of hackathon you’re walking into: **applied GenAI systems**, where the AI does reasoning and task automation (not just chatting).
-
-Let’s break this down so you’re 100% ready for whatever prompt they throw at you today.
+that’s a *classic* GenAI + automation use case 💡
+And it is classifies into: **applied GenAI systems**, where the AI does reasoning and task automation (not just chatting).
 
 ---
 
@@ -121,11 +119,3 @@ Here’s what you can do right now to be hackathon-ready:
 * 📊 End with a 10-sec impact statement (“We reduce manual invoice time by 70%”)
 
 ---
-
-If you want, I can:
-
-* ⚡ Give you **3 ready-to-pitch GenAI agent ideas** (aligned with this theme)
-* 🧩 Provide **sample prompt templates + code snippets**
-* 🗂️ Help you design your **project architecture diagram & pitch slide**
-
-Which do you want me to do next?
