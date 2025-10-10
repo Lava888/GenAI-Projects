@@ -65,6 +65,5 @@
 
 ---
 
-If you want, I can also **make a visually polished diagram with boxes and arrows** (like a slide-ready image) that you can directly use in hackathon presentations.
 
 Do you want me to create that?
