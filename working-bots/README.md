@@ -1,4 +1,4 @@
-# 📁 Working Bots - Production Ready Agents
+# 👶 Working Bots - Production Ready Agents
 
 Production-ready, tested LLM agents ready for deployment.
 

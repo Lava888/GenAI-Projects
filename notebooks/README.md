@@ -38,6 +38,9 @@ Autonomous web navigation and information gathering.
 
 **Best For:** Web data collection projects
 
+### TCS Agent Documentation (`tcs-agent.md`)
+Detailed documentation of TCS agent implementation patterns.
+
 ## 🚀 How to Use
 
 1. **Install Jupyter**
